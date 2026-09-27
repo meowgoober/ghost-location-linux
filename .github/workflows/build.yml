@@ -30,6 +30,12 @@ jobs:
           - runner: macos-15-intel
             platform: darwin
             arch: x64
+          - runner: ubuntu-24.04
+            platform: linux
+            arch: x64
+          - runner: ubuntu-24.04
+            platform: linux
+            arch: arm64
     env:
       GHOST_TARGET_PLATFORM: ${{ matrix.platform }}
       GHOST_TARGET_ARCH: ${{ matrix.arch }}

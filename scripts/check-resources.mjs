@@ -17,6 +17,13 @@ export function supportsArchitecture(bytes, platform, arch, { allowWindowsX86 = 
     const machine = bytes.readUInt16LE(offset + 4);
     return machine === 0x8664 || (allowWindowsX86 && machine === 0x014c);
   }
+  // Linux ELF
+  if (bytes[0] === 0x7f && bytes.toString('ascii', 1, 4) === 'ELF') {
+    const e_machine = bytes.readUInt16LE(18);
+    if (arch === 'x64') return e_machine === 0x3e;
+    if (arch === 'arm64') return e_machine === 0xb7;
+    return false;
+  }
   const cpu = arch === 'arm64' ? 0x0100000c : 0x01000007;
   if (bytes.readUInt32LE(0) === 0xfeedfacf) return bytes.readUInt32LE(4) === cpu;
   const magic = bytes.readUInt32BE(0);
@@ -32,7 +39,7 @@ export function supportsArchitecture(bytes, platform, arch, { allowWindowsX86 = 
 
 export function validateResources({ root = projectRoot, platform = process.platform, arch = process.arch, smoke = true } = {}) {
   const target = `${platform}-${arch}`;
-  if (!['darwin-arm64', 'darwin-x64', 'win32-x64'].includes(target)) throw new Error(`Unsupported resource target ${target}.`);
+  if (!['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64'].includes(target)) throw new Error(`Unsupported resource target ${target}.`);
   // electron-builder 26.15.3's ${platform} macro is process.platform. This app's
   // runtime preparation and PyInstaller output are deliberately native builds.
   if (smoke && (platform !== process.platform || arch !== process.arch)) {

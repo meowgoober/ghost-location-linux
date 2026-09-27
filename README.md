@@ -1,4 +1,6 @@
-# Ghost
+# Ghost (Linux fork — unofficial)
+
+> **Not the official Ghost release.** This is a community fork ported for Linux (AppImage / tar.gz builds, `linux` host platform, Linux ADB resources, and distro-specific setup instructions). For the official Mac/Windows releases see the upstream repo and releases page.
 
 A small Electron app for setting a fixed phone location or following a road route over USB or Wi-Fi. Search for a
 place, drop a pin, or enter coordinates, then explicitly apply it to your selected
@@ -18,6 +20,82 @@ Get [Ghost 0.1.7 for Mac or Windows](https://github.com/Blueturboguy07/ghost-loc
 Follow the [setup guide](SETUP.md) for Mac → iPhone, Windows → iPhone, Mac → Android, or Windows → Android, or use [Publik's guided install](https://publikhq.com/ghost/install).
 
 The downloads include the phone runtimes. No programming tools or Ghost account are needed. These early releases are unsigned; the guide explains opening them and the limits of current device testing.
+
+## Linux setup
+
+Ghost builds for Linux as `AppImage` or `tar.gz`. It needs `udev` rules for USB device access and `iw` for Wi-Fi status.
+
+### Debian / Ubuntu
+
+```sh
+# Dependencies
+sudo apt update
+sudo apt install -y libgtk-3-0 libgbm1 libnss3 libasound2 libxss1 libxtst6 libglib2.0-0 libdrm2 libgbm-dev libxshmfence1 libxkbcommon0 libegl1 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libxtst6 libgl1 libglib2.0-0
+
+# Udev rules for Android USB debugging
+sudo wget -q https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules -O /etc/udev/rules.d/51-android.rules
+sudo chmod a+r /etc/udev/rules.d/51-android.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Wi-Fi helper (optional but recommended)
+sudo apt install -y iw
+```
+
+Then download the `Linux` `tar.gz` or `AppImage` release and run:
+
+```sh
+chmod +x Ghost-0.1.7-linux-x64.AppImage
+./Ghost-0.1.7-linux-x64.AppImage
+```
+
+For `tar.gz`: `tar xzf Ghost-0.1.7-linux-x64.tar.gz && ./Ghost/Ghost`.
+
+### Fedora / RHEL / CentOS Stream
+
+```sh
+# Dependencies
+sudo dnf install -y libgtk-3.so.0 libgbm.so.1 nss libasound.so.2 libXss.so.1 libXtst.so.6 glib2 libdrm libxshmfence libxkbcommon libEGL libXcomposite libXdamage libXfixes libXrandr libglvnd-opengl libGL
+
+# Udev rules
+sudo curl -L -o /etc/udev/rules.d/51-android.rules https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules
+sudo chmod a+r /etc/udev/rules.d/51-android.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Wi-Fi helper
+sudo dnf install -y iw
+```
+
+Then extract/run the release as above.
+
+### Arch / Arch-based (Manjaro, EndeavourOS, Garuda)
+
+```sh
+# Dependencies (from AUR / repos)
+sudo pacman -S --needed gtk3 libgbm nss alsa-lib libxss libxtst glib2 libdrm libxshmfence libxkbcommon libegl libxcomposite libxdamage libxfixes libxrandr libgl
+
+# Udev rules
+sudo curl -L -o /etc/udev/rules.d/51-android.rules https://raw.githubusercontent.com/M0Rf30/android-udev-rules/master/51-android.rules
+sudo chmod a+r /etc/udev/rules.d/51-android.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Wi-Fi helper
+sudo pacman -S --needed iw
+```
+
+Then run the AppImage or extracted binary.
+
+### Other distros / DIY
+
+If your distro is not listed above, install the equivalents of:
+- `libgtk-3`, `libgbm`, `nss`, `alsa-lib`, `libXss`, `libXtst`, `glib2`, `libdrm`, `libEGL`, `libGL`
+- `udev` (already present) with Android USB rules from [M0Rf30/android-udev-rules](https://github.com/M0Rf30/android-udev-rules)
+- `iw` (to detect Wi-Fi interfaces; otherwise Ghost skips Wi-Fi status only)
+- A 64-bit (or ARM64) glibc-based userspace
+
+Download the `tar.gz`, extract it, and run `./Ghost` from inside the folder. If the binary reports a missing library, install the package that provides it (usually the `-dev` or runtime package with that `.so` name). For iPhone support you also need Python 3.12+ and to run `npm run runtime:prepare` (or `npm run runtime:ios`) before the first package build.
 
 ## Features
 

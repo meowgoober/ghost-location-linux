@@ -85,6 +85,13 @@
         "nsis"
       ]
     },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "category": "Utility"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true

@@ -8,6 +8,9 @@ export async function wifiStatus({platform = process.platform, runner = run, int
     const result = await runner('/usr/sbin/networksetup', ['-listallhardwareports'], {timeoutMs: 5000});
     if (result.code !== 0) return {wifi: false};
     names = [...result.stdout.matchAll(/Hardware Port: (?:Wi-Fi|AirPort)\r?\nDevice: ([^\r\n]+)/g)].map(m => m[1].trim());
+  } else if (platform === 'linux') {
+    const result = await runner('iw', ['dev'], {timeoutMs: 5000});
+    if (result.code === 0) names = [...result.stdout.matchAll(/Interface\s+([\w.-]+)/g)].map(m => m[1].trim());
   } else if (platform === 'win32') {
     const result = await runner('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', "@(Get-NetAdapter -Physical | Where-Object { $_.Status -eq 'Up' -and $_.NdisPhysicalMedium -in 1,9 } | Select-Object -ExpandProperty Name) | ConvertTo-Json -Compress"], {timeoutMs: 5000});
     if (result.code !== 0 || !result.stdout.trim()) return {wifi: false};

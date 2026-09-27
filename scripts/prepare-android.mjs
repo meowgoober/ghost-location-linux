@@ -12,6 +12,7 @@ const require = createRequire(import.meta.url);
 // Google publishes SHA-1 here; also record SHA-256 for every artifact we package.
 const TOOLS = {
   darwin: {file: 'platform-tools_r37.0.1-darwin.zip', sha1: '6ae73f4de6452dc57e62ec02b68eed92a4c21661', size: 16110554},
+  linux: {file: 'platform-tools_r37.0.1-linux.zip', sha1: '477254aa5f903c15cf51001717bdf347fb6b53e0', size: 9054187},
   win32: {file: 'platform-tools_r37.0.1-win.zip', sha1: 'e03e78b1d80b396f1c3358e31251cb31740e1110', size: 8044989},
 };
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -50,7 +51,7 @@ async function prepareApk() {
 async function prepareAdb(platform, arch) {
   const archive = TOOLS[platform];
   if (!archive || !['x64', 'arm64'].includes(arch) || (platform === 'win32' && arch !== 'x64')) {
-    throw new Error('Supported ADB package targets: darwin-arm64, darwin-x64 and win32-x64.');
+    throw new Error('Supported ADB package targets: darwin-arm64, darwin-x64, linux-x64, linux-arm64 and win32-x64.');
   }
   const url = `https://dl.google.com/android/repository/${archive.file}`;
   const temp = await mkdtemp(path.join(tmpdir(), 'ghost-android-'));
@@ -87,7 +88,7 @@ async function prepareAdb(platform, arch) {
     await mkdir(destination, {recursive: true});
     const packaged = [];
     for (const entry of await readdir(source, {withFileTypes: true})) {
-      if (!entry.isFile() || !/^(adb(?:\.exe)?|.*\.dll|.*\.dylib|NOTICE\.txt|source\.properties)$/.test(entry.name)) continue;
+      if (!entry.isFile() || !/^(adb(?:\.exe)?|.*\.dll|.*\.dylib|.*\.so|NOTICE\.txt|source\.properties)$/.test(entry.name)) continue;
       const content = await readFile(path.join(source, entry.name));
       await copyFile(path.join(source, entry.name), path.join(destination, entry.name));
       if (entry.name === 'adb') await chmod(path.join(destination, entry.name), 0o755);
